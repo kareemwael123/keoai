@@ -3,159 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KeoAI - كيو المساعد الذكي والمرح</title>
-    
-    <!-- Tailwind CSS -->
+    <title>KeoAI - المساعد الذكي والمرح</title>
+    <!-- Tailwind CSS للتصميم -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#3b82f6',
-                        secondary: '#60a5fa',
-                        lightbg: '#f0fdfa', // لون فاتح ومريح
-                    }
-                }
-            }
-        }
-    </script>
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Marked.js for Markdown parsing -->
+    <!-- Marked.js لتحويل النصوص والأكواد -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
+    <!-- خطوط جوجل -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
-        body { font-family: 'Tajawal', sans-serif; }
-        
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb { background: #93c5fd; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
-
-        .markdown-body pre { background: #1e293b; color: #fff; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin-top: 0.5rem; margin-bottom: 0.5rem; text-align: left; direction: ltr; }
+        body { font-family: 'Cairo', sans-serif; background-color: #f0fdf4; }
+        .markdown-body pre { background: #1e293b; color: #f8fafc; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin-top: 0.5rem; margin-bottom: 0.5rem; direction: ltr; text-align: left;}
         .markdown-body code { font-family: monospace; }
         .markdown-body p { margin-bottom: 0.5rem; }
-        .slide { display: none; animation: fadeIn 0.5s; }
-        .slide.active { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; height: 100%; }
-        
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .slide-transition { transition: opacity 0.3s ease-in-out; }
+        /* شريط التمرير */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="bg-lightbg text-gray-800 h-screen flex flex-col overflow-hidden">
+<body class="h-screen flex flex-col overflow-hidden text-gray-800">
 
-    <!-- Login Screen -->
-    <div id="login-screen" class="absolute inset-0 bg-gradient-to-br from-blue-50 to-cyan-100 flex flex-col items-center justify-center z-50">
-        <div class="bg-white p-10 rounded-3xl shadow-2xl text-center max-w-md w-full border border-blue-100">
-            <div class="text-6xl mb-4 animate-bounce">🤖✨</div>
-            <h1 class="text-4xl font-extrabold text-primary mb-2">KeoAI</h1>
-            <p class="text-gray-500 mb-8 font-medium">مساعدك البرمجي المرح، صُنع بشغف بواسطة<br><span class="text-primary font-bold">كريم حسين محمدصلاح</span></p>
-            <button id="login-btn" class="w-full bg-primary hover:bg-blue-600 text-white font-bold py-4 px-6 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-3 text-lg">
-                <i class="fab fa-google text-xl"></i>
-                تسجيل الدخول باستخدام جوجل
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-green-100 p-4 flex justify-between items-center z-10">
+        <div class="flex items-center gap-2">
+            <h1 class="text-3xl font-extrabold text-green-600 tracking-tight">✨ KeoAI</h1>
+            <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-bold">بواسطة كريم حسين</span>
+        </div>
+        <div id="auth-container">
+            <!-- سيتم تحديث هذا القسم عبر الجافاسكربت بناءً على حالة تسجيل الدخول -->
+            <button id="login-btn" class="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-full font-semibold transition shadow-md text-sm md:text-base flex items-center gap-2">
+                <svg class="w-5 h-5 bg-white rounded-full p-0.5" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>
+                تسجيل الدخول لحفظ المحادثات
             </button>
         </div>
+    </header>
+
+    <!-- منطقة التنبيه للزوار -->
+    <div id="guest-banner" class="bg-yellow-50 text-yellow-800 text-sm text-center py-2 border-b border-yellow-200 shadow-sm transition-all">
+        أنت تستخدم كيو كزائر. الدردشات الحالية لن يتم حفظها إذا قمت بتحديث الصفحة. سجل الدخول لحفظها للأبد!
     </div>
 
-    <!-- Main App Screen (Hidden initially) -->
-    <div id="app-screen" class="hidden h-screen flex flex-col">
+    <!-- Main Content Layout -->
+    <div class="flex-1 flex w-full h-full overflow-hidden relative">
         
-        <!-- Header -->
-        <header class="bg-white shadow-sm border-b border-blue-100 p-4 flex justify-between items-center z-10 shrink-0">
-            <div class="flex items-center gap-3">
-                <div class="bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center text-xl font-bold shadow-md">K</div>
-                <h1 class="text-2xl font-extrabold text-primary">Keo<span class="text-secondary">AI</span></h1>
-            </div>
-            
-            <div class="flex items-center gap-4">
-                <input type="password" id="groq-api-key" placeholder="Groq API Key (مطلوب)" class="text-sm px-4 py-2 border border-blue-200 rounded-full focus:outline-none focus:border-primary text-left" dir="ltr">
-                <div class="flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-full border border-blue-100">
-                    <img id="user-avatar" src="" alt="User" class="w-8 h-8 rounded-full border-2 border-white shadow-sm">
-                    <span id="user-name" class="font-medium text-sm text-gray-700"></span>
+        <!-- القسم الأيمن: الدردشة -->
+        <main id="chat-section" class="flex-1 flex flex-col h-full bg-white relative transition-all duration-300 w-full lg:w-1/2 lg:border-l border-gray-200 shadow-xl z-20">
+            <!-- مساحة عرض الرسائل -->
+            <div id="chat-box" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 bg-slate-50">
+                <!-- رسالة ترحيبية افتراضية -->
+                <div class="flex justify-start">
+                    <div class="bg-white border border-green-100 shadow-sm p-4 rounded-2xl rounded-tr-none max-w-[85%] text-gray-800 markdown-body">
+                        أهلاً بيك! 👋 أنا <b>كيو (Keo)</b>، مساعدك الذكي والمرح.<br>
+                        صنعني المبدع <b>كريم حسين محمدصلاح</b> عشان أساعدك في أي حاجة!<br>
+                        بتحب نكتب كود، نعمل عرض تقديمي، ولا ندردش بس؟ 🚀
+                    </div>
                 </div>
-                <button id="logout-btn" class="text-red-500 hover:bg-red-50 px-4 py-2 rounded-full transition-colors text-sm font-bold flex items-center gap-2">
-                    <i class="fas fa-sign-out-alt"></i> خروج
+            </div>
+
+            <!-- منطقة الإدخال -->
+            <div class="p-4 bg-white border-t border-gray-200">
+                <form id="chat-form" class="flex gap-2 relative">
+                    <input type="text" id="user-input" autocomplete="off" placeholder="اطلب من كيو أي شيء..." class="flex-1 bg-gray-50 p-4 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400 focus:bg-white transition-all pr-12 text-gray-800 shadow-inner">
+                    <button type="submit" id="send-btn" class="bg-green-500 text-white p-4 rounded-full hover:bg-green-600 transition-colors shadow-md flex items-center justify-center min-w-[60px]">
+                        <svg class="w-6 h-6 transform -rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19V6m0 0l-7 7m7-7l7 7"></path></svg>
+                    </button>
+                </form>
+            </div>
+        </main>
+
+        <!-- القسم الأيسر: العروض التفاعلية (مخفي افتراضياً) -->
+        <aside id="interactive-panel" class="hidden absolute lg:relative w-full lg:w-1/2 h-full bg-slate-100 flex-col z-30 transition-transform transform translate-x-full lg:translate-x-0">
+            
+            <!-- هيدر الشاشة الجانبية -->
+            <div class="bg-slate-800 text-white p-3 flex justify-between items-center shadow-md">
+                <div class="flex gap-3">
+                    <button id="tab-preview" class="px-4 py-1 rounded-full bg-blue-500 font-bold text-sm hidden">معاينة الكود 💻</button>
+                    <button id="tab-presentation" class="px-4 py-1 rounded-full bg-purple-500 font-bold text-sm hidden">العرض التقديمي 📊</button>
+                </div>
+                <button id="close-panel" class="text-gray-300 hover:text-white p-1 bg-slate-700 rounded-full lg:hidden">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-        </header>
 
-        <!-- Content Area -->
-        <div class="flex-1 flex overflow-hidden">
-            
-            <!-- Chat Sidebar -->
-            <div class="w-1/3 bg-white border-l border-blue-100 flex flex-col shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-10">
-                <div id="chat-container" class="flex-1 overflow-y-auto p-4 space-y-4">
-                    <!-- Messages will appear here -->
-                    <div class="text-center text-gray-400 mt-10">
-                        <i class="fas fa-robot text-4xl mb-3 text-secondary"></i>
-                        <p>أهلاً بك! أنا كيو.. اسألني أي شيء في البرمجة!</p>
-                    </div>
-                </div>
-                
-                <div class="p-4 bg-white border-t border-blue-50">
-                    <form id="chat-form" class="relative">
-                        <textarea id="chat-input" rows="2" placeholder="اطلب من كيو كتابة كود أو عمل عرض تقديمي..." class="w-full bg-blue-50 border border-blue-100 rounded-2xl py-3 px-4 pr-12 focus:outline-none focus:ring-2 focus:ring-primary resize-none transition-all"></textarea>
-                        <button type="submit" class="absolute bottom-3 left-3 bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors shadow-md">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
-                    </form>
-                </div>
+            <!-- حاوية معاينة الكود (Iframe) -->
+            <div id="code-preview-container" class="flex-1 bg-white hidden w-full h-full relative">
+                <iframe id="preview-iframe" class="w-full h-full border-none bg-white"></iframe>
             </div>
 
-            <!-- Workspace Area (Preview & Presentation) -->
-            <div class="w-2/3 bg-slate-50 flex flex-col relative p-4">
+            <!-- حاوية العرض التقديمي -->
+            <div id="presentation-container" class="flex-1 bg-gradient-to-br from-slate-900 to-slate-800 hidden flex-col justify-center items-center p-8 relative">
+                <div id="slide-content" class="bg-white text-slate-900 p-10 rounded-2xl shadow-2xl w-full max-w-2xl min-h-[300px] flex flex-col justify-center text-center markdown-body text-xl slide-transition">
+                    <!-- محتوى الشريحة سيظهر هنا -->
+                </div>
                 
-                <!-- Toggle Views -->
-                <div class="flex gap-2 mb-4">
-                    <button id="btn-preview" class="bg-white text-primary px-6 py-2 rounded-full shadow-sm border border-blue-200 font-bold hover:bg-blue-50 active">معاينة الكود (Preview)</button>
-                    <button id="btn-presentation" class="bg-white text-gray-500 px-6 py-2 rounded-full shadow-sm border border-transparent font-bold hover:bg-gray-50">العرض التقديمي (Presentation)</button>
+                <!-- أزرار التحكم في الشرائح -->
+                <div class="absolute bottom-8 flex gap-6 bg-slate-800/80 p-3 rounded-full backdrop-blur-sm border border-slate-600 shadow-lg">
+                    <button id="prev-slide" class="text-white hover:text-purple-400 font-bold px-4 py-2 disabled:opacity-50">السابق ◀</button>
+                    <span id="slide-counter" class="text-gray-300 font-mono font-bold flex items-center">1 / 1</span>
+                    <button id="next-slide" class="text-white hover:text-purple-400 font-bold px-4 py-2 disabled:opacity-50">▶ التالي</button>
                 </div>
-
-                <!-- Code Preview Container -->
-                <div id="preview-container" class="flex-1 bg-white rounded-3xl shadow-sm border border-blue-100 overflow-hidden relative">
-                    <iframe id="code-iframe" class="w-full h-full border-none"></iframe>
-                    <div id="preview-placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 bg-white">
-                        <i class="fas fa-code text-6xl mb-4 text-blue-100"></i>
-                        <p class="text-lg">سيتم عرض واجهة الأكواد (HTML/CSS/JS) هنا</p>
-                    </div>
-                </div>
-
-                <!-- Presentation Container -->
-                <div id="presentation-container" class="hidden flex-1 bg-gradient-to-br from-indigo-900 to-blue-900 rounded-3xl shadow-xl border-4 border-white overflow-hidden relative text-white">
-                    <div id="slides-wrapper" class="w-full h-full p-10">
-                        <div class="slide active">
-                            <h1 class="text-4xl font-bold mb-4">✨ عروض كيو التقديمية</h1>
-                            <p class="text-xl text-blue-200">اطلب مني عمل عرض تقديمي لأي كود أو موضوع!</p>
-                        </div>
-                    </div>
-                    
-                    <!-- Slide Controls -->
-                    <div class="absolute bottom-6 left-0 right-0 flex justify-center gap-4">
-                        <button id="prev-slide" class="bg-white/20 hover:bg-white/40 text-white rounded-full w-12 h-12 flex items-center justify-center backdrop-blur-sm transition-all">
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                        <span id="slide-counter" class="bg-black/30 px-4 py-2 rounded-full font-bold">1 / 1</span>
-                        <button id="next-slide" class="bg-white/20 hover:bg-white/40 text-white rounded-full w-12 h-12 flex items-center justify-center backdrop-blur-sm transition-all">
-                            <i class="fas fa-chevron-left"></i>
-                        </button>
-                    </div>
-                </div>
-
             </div>
-        </div>
+        </aside>
+
     </div>
 
-    <!-- Firebase and Application Logic (ES Modules) -->
+    <!-- 스كريبتات التطبيق -->
     <script type="module">
-        // 1. Firebase Setup
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
+        // إعدادات Firebase الخاصة بك
         const firebaseConfig = {
             apiKey: "AIzaSyC0lwVRTBPA3yxnZ3wuqvyfQJbJP-AVNJo",
             authDomain: "kareem-8ed77.firebaseapp.com",
@@ -171,246 +131,280 @@
         const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
 
-        // 2. Global Variables
+        // إعدادات Groq
+        const GROQ_API_KEY = "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";
+        
+        // System Prompt الصارم لشخصية كيو وتوجيهات الأكواد والعروض
+        const SYSTEM_PROMPT = `أنت مساعد ذكي، ودود، ومرح جداً، اسمك "Keo" (كيو).
+المبرمج والمطور الذي قام بصناعتك وتطويرك هو المهندس "كريم حسين محمدصلاح". 
+ممنوع منعاً باتاً أن تذكر أنك مبني على LLaMA أو أن الشركة المطورة لك هي Groq أو OpenAI أو أي شركة أخرى. أنت من صنع كريم حسين وفقط.
+استخدم الرموز التعبيرية (Emojis) دائماً لتكون مرحاً.
+
+[توجيهات برمجية وعروض تقديمية - اقرأها بعناية]:
+1. إذا طلب المستخدم كتابة كود لموقع (HTML/CSS/JS)، اكتب كود HTML واحد كامل يحتوي على CSS و JS بداخله. ضعه كله داخل كتلة كود (Code Block) واحدة من نوع html هكذا:
+\`\`\`html
+<!DOCTYPE html> ...الكود... 
+\`\`\`
+2. إذا طلب المستخدم "عرض تقديمي" أو "Presentation"، يجب عليك كتابته بالصيغة التالية تماماً:
+ابدأ بـ [PRESENTATION_START]
+ثم اكتب محتوى الشريحة الأولى، ثم ضع الفاصل [SLIDE_BREAK]
+ثم الشريحة الثانية، ثم [SLIDE_BREAK]... وهكذا
+في النهاية ضع [PRESENTATION_END]
+لا تضع هذه العلامات إلا إذا طلب المستخدم عرضاً تقديمياً.`;
+
+        // متغيرات الحالة
         let currentUser = null;
+        let localMessages = []; // مصفوفة للزوار
         let currentSlides = [];
         let currentSlideIndex = 0;
+        let unsubscribeChats = null; // لإيقاف الاستماع لقاعدة البيانات عند تسجيل الخروج
 
-        // 3. System Prompt for KEO
-        const KEO_PROMPT = `
-        أنت مساعد ذكي ومرح جداً اسمك Keo (كيو). تم برمجتك وتطويرك بواسطة المهندس "كريم حسين محمدصلاح".
-        ممنوع منعاً باتاً أن تذكر أنك مبني على أي نموذج ذكاء اصطناعي آخر (مثل GPT أو Groq أو LLaMA) أو تذكر اسم الشركة المطورة لك.
-        أجب دائماً بأسلوب ودود، استخدم الرموز التعبيرية (Emojis) بكثرة.
-        أنت خبير في البرمجة وعمل Code Review والعروض التقديمية.
-        
-        **تعليمات هامة جداً للرد:**
-        1. إذا طلب المستخدم كود لواجهة (HTML/CSS/JS)، اكتب الكود كاملاً في ملف واحد داخل بلوك كود من نوع HTML هكذا:
-        \`\`\`html
-        <!DOCTYPE html>... الكود هنا
-        \`\`\`
-        2. إذا طلب المستخدم عرض تقديمي (Presentation)، اكتب المحتوى داخل بلوك من نوع presentation، وافصل كل شريحة عن الأخرى بثلاث شرطات (---)، هكذا:
-        \`\`\`presentation
-        # عنوان الشريحة الأولى
-        محتوى الشريحة
-        ---
-        # عنوان الشريحة الثانية
-        محتوى الشريحة
-        \`\`\`
-        `;
-
-        // 4. UI Elements
-        const loginScreen = document.getElementById('login-screen');
-        const appScreen = document.getElementById('app-screen');
-        const loginBtn = document.getElementById('login-btn');
-        const logoutBtn = document.getElementById('logout-btn');
-        const userName = document.getElementById('user-name');
-        const userAvatar = document.getElementById('user-avatar');
+        // عناصر الواجهة
+        const authContainer = document.getElementById('auth-container');
+        const guestBanner = document.getElementById('guest-banner');
+        const chatBox = document.getElementById('chat-box');
         const chatForm = document.getElementById('chat-form');
-        const chatInput = document.getElementById('chat-input');
-        const chatContainer = document.getElementById('chat-container');
-        const apiKeyInput = document.getElementById('groq-api-key');
-        
-        const btnPreview = document.getElementById('btn-preview');
-        const btnPresentation = document.getElementById('btn-presentation');
-        const previewContainer = document.getElementById('preview-container');
+        const userInput = document.getElementById('user-input');
+        const interactivePanel = document.getElementById('interactive-panel');
+        const tabPreview = document.getElementById('tab-preview');
+        const tabPresentation = document.getElementById('tab-presentation');
+        const codePreviewContainer = document.getElementById('code-preview-container');
         const presentationContainer = document.getElementById('presentation-container');
-        const iframe = document.getElementById('code-iframe');
-        const previewPlaceholder = document.getElementById('preview-placeholder');
-        
-        // 5. Auth Logic
+        const previewIframe = document.getElementById('preview-iframe');
+        const slideContent = document.getElementById('slide-content');
+        const closePanelBtn = document.getElementById('close-panel');
+
+        // ------------------ إدارة المصادقة (Auth) ------------------
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
-                loginScreen.classList.add('hidden');
-                appScreen.classList.remove('hidden');
-                userName.textContent = user.displayName.split(' ')[0];
-                userAvatar.src = user.photoURL;
-                loadChats(user.uid);
+                guestBanner.classList.add('hidden');
+                authContainer.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="text-sm font-semibold text-gray-700 hidden md:inline">مرحباً، ${user.displayName.split(' ')[0]}</span>
+                        <img src="${user.photoURL}" alt="Profile" class="w-8 h-8 rounded-full border-2 border-green-500">
+                        <button id="logout-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1.5 rounded-full text-sm font-bold transition">خروج</button>
+                    </div>
+                `;
+                document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+                
+                // مسح الشات الحالي وتحميل الشات من الداتا بيس
+                chatBox.innerHTML = ''; 
+                loadChatsFromFirebase();
             } else {
                 currentUser = null;
-                loginScreen.classList.remove('hidden');
-                appScreen.classList.add('hidden');
-                chatContainer.innerHTML = '';
+                guestBanner.classList.remove('hidden');
+                authContainer.innerHTML = `
+                    <button id="login-btn-top" class="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-full font-semibold transition shadow-md text-sm flex items-center gap-2">
+                        تسجيل الدخول
+                    </button>
+                `;
+                document.getElementById('login-btn-top').addEventListener('click', () => signInWithPopup(auth, provider));
+                if (unsubscribeChats) unsubscribeChats();
+                
+                // إعادة رسم الرسائل المحلية إذا تم تسجيل الخروج
+                chatBox.innerHTML = '';
+                if(localMessages.length === 0) {
+                     addMessageToUI('keo', "أهلاً بيك! 👋 أنا <b>كيو (Keo)</b>، مساعدك الذكي والمرح.<br>صنعني المبدع <b>كريم حسين محمدصلاح</b> عشان أساعدك في أي حاجة!<br>بتحب نكتب كود، نعمل عرض تقديمي، ولا ندردش بس؟ 🚀");
+                } else {
+                    localMessages.forEach(msg => addMessageToUI(msg.sender, msg.text, false));
+                }
             }
         });
 
-        loginBtn.addEventListener('click', () => signInWithPopup(auth, provider));
-        logoutBtn.addEventListener('click', () => signOut(auth));
-
-        // 6. Chat & Groq Logic
-        const loadChats = (uid) => {
-            const q = query(collection(db, `users/${uid}/chats`), orderBy('createdAt', 'asc'));
-            onSnapshot(q, (snapshot) => {
-                chatContainer.innerHTML = '';
+        // ------------------ الاتصال بقاعدة البيانات ------------------
+        function loadChatsFromFirebase() {
+            if (!currentUser) return;
+            const q = query(collection(db, `users/${currentUser.uid}/chats`), orderBy('createdAt', 'asc'));
+            unsubscribeChats = onSnapshot(q, (snapshot) => {
+                chatBox.innerHTML = ''; // تنظيف قبل إعادة الرسم
+                if(snapshot.empty) {
+                     addMessageToUI('keo', "أهلاً بيك يا غالي! 👋 أنا <b>كيو</b> معاك. بحسابك المسجل ده كل شاتاتنا هتتحفظ هنا. جاهز نبرمج؟");
+                }
                 snapshot.forEach((doc) => {
-                    appendMessage(doc.data().text, doc.data().sender);
+                    const data = doc.data();
+                    addMessageToUI(data.sender, data.text, false);
                 });
-                chatContainer.scrollTop = chatContainer.scrollHeight;
+                chatBox.scrollTop = chatBox.scrollHeight;
             });
-        };
+        }
 
-        const appendMessage = (text, sender) => {
+        async function saveMessage(sender, text) {
+            // إضافة للواجهة فوراً والمحلية
+            if (!currentUser) {
+                localMessages.push({ sender, text });
+                addMessageToUI(sender, text);
+            } else {
+                // حفظ في الداتا بيس
+                addMessageToUI(sender, text); // رسم مبدئي سريع
+                try {
+                    await addDoc(collection(db, `users/${currentUser.uid}/chats`), {
+                        sender: sender,
+                        text: text,
+                        createdAt: serverTimestamp()
+                    });
+                } catch (e) {
+                    console.error("Error saving doc", e);
+                }
+            }
+            
+            // فحص المحتوى إذا كان من كيو لعرض الـ Panels
+            if(sender === 'keo') {
+                checkForCodeOrPresentation(text);
+            }
+        }
+
+        // ------------------ واجهة الدردشة ------------------
+        function addMessageToUI(sender, text, scroll = true) {
             const div = document.createElement('div');
             div.className = `flex ${sender === 'user' ? 'justify-end' : 'justify-start'} mb-4`;
             
-            let htmlContent = sender === 'keo' ? marked.parse(text) : text;
+            let bgClass = sender === 'user' ? 'bg-green-500 text-white rounded-br-none' : 'bg-white border border-gray-200 text-gray-800 rounded-tr-none shadow-sm markdown-body';
             
-            div.innerHTML = `
-                <div class="max-w-[85%] rounded-2xl p-4 shadow-sm ${sender === 'user' ? 'bg-primary text-white rounded-br-none' : 'bg-white border border-blue-100 text-gray-800 rounded-bl-none markdown-body'}">
-                    ${sender === 'keo' ? '<div class="text-xs font-bold text-secondary mb-1"><i class="fas fa-robot"></i> كيو</div>' : ''}
-                    <div style="word-break: break-word;">${htmlContent}</div>
-                </div>
-            `;
-            chatContainer.appendChild(div);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+            // استخدام Marked.js لتحويل المارک داون إلى HTML إذا كان من Keo
+            let formattedText = sender === 'keo' ? marked.parse(text) : text;
 
-            // Extract Code or Presentation if it's Keo
-            if (sender === 'keo') {
-                extractAndRenderCode(text);
-                extractAndRenderPresentation(text);
-            }
-        };
+            div.innerHTML = `<div class="p-4 rounded-2xl max-w-[90%] md:max-w-[80%] ${bgClass}">${formattedText}</div>`;
+            chatBox.appendChild(div);
+            if (scroll) chatBox.scrollTop = chatBox.scrollHeight;
+        }
 
+        // ------------------ الاتصال بـ Groq API ------------------
         chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const msg = chatInput.value.trim();
-            const apiKey = apiKeyInput.value.trim();
+            const text = userInput.value.trim();
+            if (!text) return;
             
-            if (!msg) return;
-            if (!apiKey) {
-                alert("رجاءً أدخل مفتاح Groq API في الأعلى لكي يعمل كيو!");
-                return;
-            }
-
-            chatInput.value = '';
+            userInput.value = '';
+            await saveMessage('user', text);
             
-            // Add User Message to DB
-            await addDoc(collection(db, `users/${currentUser.uid}/chats`), {
-                text: msg,
-                sender: 'user',
-                createdAt: serverTimestamp()
-            });
-
-            // Show Typing indicator
-            const typingId = 'typing-' + Date.now();
+            // إظهار مؤشر الكتابة
             const typingDiv = document.createElement('div');
-            typingDiv.id = typingId;
+            typingDiv.id = 'typing-indicator';
             typingDiv.className = 'flex justify-start mb-4';
-            typingDiv.innerHTML = `<div class="bg-white border border-blue-100 p-4 rounded-2xl rounded-bl-none text-gray-500 shadow-sm"><i class="fas fa-circle-notch fa-spin"></i> كيو يفكر...</div>`;
-            chatContainer.appendChild(typingDiv);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+            typingDiv.innerHTML = `<div class="bg-gray-100 text-gray-500 p-3 rounded-2xl rounded-tr-none text-sm animate-pulse">كيو يكتب... ✨</div>`;
+            chatBox.appendChild(typingDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
 
             try {
-                // Call Groq API
+                // تجميع الهيستوري (آخر 5 رسائل للحفاظ على السياق)
+                let apiMessages = [{ role: "system", content: SYSTEM_PROMPT }];
+                
+                // جلب الرسائل السابقة (من الواجهة ببساطة)
+                const chatElements = chatBox.querySelectorAll('.markdown-body, .bg-green-500');
+                let context = [];
+                chatElements.forEach(el => {
+                    let role = el.classList.contains('bg-green-500') ? 'user' : 'assistant';
+                    context.push({ role: role, content: el.innerText });
+                });
+                
+                // إضافة آخر رسائل
+                apiMessages = apiMessages.concat(context.slice(-6)); 
+
                 const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST",
                     headers: {
-                        "Authorization": `Bearer ${apiKey}`,
+                        "Authorization": `Bearer ${GROQ_API_KEY}`,
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        model: "llama3-70b-8192", // Fast and capable model
-                        messages: [
-                            { role: "system", content: KEO_PROMPT },
-                            { role: "user", content: msg }
-                        ]
+                        model: "llama3-70b-8192", 
+                        messages: apiMessages,
+                        temperature: 0.7
                     })
                 });
-
-                const data = await response.json();
-                if(data.error) throw new Error(data.error.message);
                 
-                const keoReply = data.choices[0].message.content;
-
-                // Remove typing
-                document.getElementById(typingId).remove();
-
-                // Save Keo Reply to DB
-                await addDoc(collection(db, `users/${currentUser.uid}/chats`), {
-                    text: keoReply,
-                    sender: 'keo',
-                    createdAt: serverTimestamp()
-                });
-
-            } catch (error) {
-                document.getElementById(typingId).remove();
-                alert("حدث خطأ في الاتصال: " + error.message);
+                const data = await response.json();
+                document.getElementById('typing-indicator').remove();
+                
+                if (data.choices && data.choices[0].message) {
+                    const keoReply = data.choices[0].message.content;
+                    await saveMessage('keo', keoReply);
+                }
+            } catch (err) {
+                console.error(err);
+                document.getElementById('typing-indicator').remove();
+                await saveMessage('keo', "عذراً، حصلت مشكلة في الاتصال بعقلي الإلكتروني! جرب تاني يا صديقي. 😅");
             }
         });
 
-        // Submit on Enter (Shift+Enter for new line)
-        chatInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                chatForm.dispatchEvent(new Event('submit'));
-            }
-        });
+        // ------------------ منطق معاينة الكود والعروض التقديمية ------------------
+        function checkForCodeOrPresentation(text) {
+            let hasInteractive = false;
 
-        // 7. Workspace Logic (Preview & Presentations)
-        const switchView = (view) => {
-            if (view === 'preview') {
-                previewContainer.classList.remove('hidden');
-                presentationContainer.classList.add('hidden');
-                btnPreview.className = "bg-white text-primary px-6 py-2 rounded-full shadow-sm border border-blue-200 font-bold hover:bg-blue-50";
-                btnPresentation.className = "bg-transparent text-gray-500 px-6 py-2 rounded-full font-bold hover:bg-white hover:shadow-sm";
-            } else {
-                previewContainer.classList.add('hidden');
+            // 1. فحص العروض التقديمية
+            if (text.includes("[PRESENTATION_START]")) {
+                const startIdx = text.indexOf("[PRESENTATION_START]") + 20;
+                const endIdx = text.indexOf("[PRESENTATION_END]");
+                if (startIdx > 19 && endIdx > startIdx) {
+                    const slidesText = text.substring(startIdx, endIdx);
+                    currentSlides = slidesText.split("[SLIDE_BREAK]").map(s => s.trim()).filter(s => s !== "");
+                    
+                    if(currentSlides.length > 0) {
+                        currentSlideIndex = 0;
+                        openPanel('presentation');
+                        renderSlide();
+                        hasInteractive = true;
+                    }
+                }
+            }
+            
+            // 2. فحص الأكواد (HTML) إذا لم يكن عرضاً تقديمياً
+            if (!hasInteractive) {
+                const codeBlockMatch = text.match(/```html([\s\S]*?)```/i);
+                if (codeBlockMatch && codeBlockMatch[1]) {
+                    const rawHtml = codeBlockMatch[1];
+                    previewIframe.srcdoc = rawHtml;
+                    openPanel('code');
+                    hasInteractive = true;
+                }
+            }
+        }
+
+        // التحكم بالشاشة الجانبية
+        function openPanel(type) {
+            interactivePanel.classList.remove('hidden', 'translate-x-full');
+            interactivePanel.classList.add('flex', 'translate-x-0'); // للموبايل أنيمشن
+            
+            tabPreview.classList.add('hidden');
+            tabPresentation.classList.add('hidden');
+            codePreviewContainer.classList.add('hidden');
+            presentationContainer.classList.add('hidden');
+
+            if (type === 'code') {
+                tabPreview.classList.remove('hidden');
+                codePreviewContainer.classList.remove('hidden');
+                codePreviewContainer.classList.add('flex');
+            } else if (type === 'presentation') {
+                tabPresentation.classList.remove('hidden');
                 presentationContainer.classList.remove('hidden');
-                btnPresentation.className = "bg-white text-primary px-6 py-2 rounded-full shadow-sm border border-blue-200 font-bold hover:bg-blue-50";
-                btnPreview.className = "bg-transparent text-gray-500 px-6 py-2 rounded-full font-bold hover:bg-white hover:shadow-sm";
+                presentationContainer.classList.add('flex');
             }
-        };
+        }
 
-        btnPreview.addEventListener('click', () => switchView('preview'));
-        btnPresentation.addEventListener('click', () => switchView('presentation'));
-
-        const extractAndRenderCode = (text) => {
-            const codeBlockRegex = /```html\n([\s\S]*?)```/;
-            const match = text.match(codeBlockRegex);
-            if (match && match[1]) {
-                switchView('preview');
-                previewPlaceholder.style.display = 'none';
-                const doc = iframe.contentWindow.document;
-                doc.open();
-                doc.write(match[1]);
-                doc.close();
-            }
-        };
-
-        const extractAndRenderPresentation = (text) => {
-            const presBlockRegex = /```presentation\n([\s\S]*?)```/;
-            const match = text.match(presBlockRegex);
-            if (match && match[1]) {
-                switchView('presentation');
-                const slidesContent = match[1].split('---').map(s => s.trim()).filter(s => s);
-                currentSlides = slidesContent;
-                currentSlideIndex = 0;
-                renderSlide();
-            }
-        };
-
-        const renderSlide = () => {
-            if (currentSlides.length === 0) return;
-            const wrapper = document.getElementById('slides-wrapper');
-            const counter = document.getElementById('slide-counter');
-            
-            wrapper.innerHTML = `<div class="slide active markdown-body p-8 bg-white/10 backdrop-blur-md rounded-2xl shadow-xl w-full max-w-4xl max-h-[80%] overflow-y-auto border border-white/20">
-                ${marked.parse(currentSlides[currentSlideIndex])}
-            </div>`;
-            
-            counter.textContent = `${currentSlideIndex + 1} / ${currentSlides.length}`;
-        };
-
-        document.getElementById('next-slide').addEventListener('click', () => {
-            if (currentSlideIndex < currentSlides.length - 1) {
-                currentSlideIndex++;
-                renderSlide();
-            }
+        closePanelBtn.addEventListener('click', () => {
+            interactivePanel.classList.add('hidden', 'translate-x-full');
         });
+
+        // منطق أزرار العرض التقديمي
+        function renderSlide() {
+            slideContent.innerHTML = marked.parse(currentSlides[currentSlideIndex]);
+            document.getElementById('slide-counter').innerText = `${currentSlideIndex + 1} / ${currentSlides.length}`;
+            
+            document.getElementById('prev-slide').disabled = currentSlideIndex === 0;
+            document.getElementById('next-slide').disabled = currentSlideIndex === currentSlides.length - 1;
+        }
 
         document.getElementById('prev-slide').addEventListener('click', () => {
             if (currentSlideIndex > 0) {
                 currentSlideIndex--;
+                renderSlide();
+            }
+        });
+
+        document.getElementById('next-slide').addEventListener('click', () => {
+            if (currentSlideIndex < currentSlides.length - 1) {
+                currentSlideIndex++;
                 renderSlide();
             }
         });
