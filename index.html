@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KeoAI - كيو المساعد الذكي والمرح</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#60a5fa',
+                        lightbg: '#f0fdfa', // لون فاتح ومريح
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Marked.js for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
+        body { font-family: 'Tajawal', sans-serif; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #93c5fd; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
+
+        .markdown-body pre { background: #1e293b; color: #fff; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin-top: 0.5rem; margin-bottom: 0.5rem; text-align: left; direction: ltr; }
+        .markdown-body code { font-family: monospace; }
+        .markdown-body p { margin-bottom: 0.5rem; }
+        .slide { display: none; animation: fadeIn 0.5s; }
+        .slide.active { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; height: 100%; }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body class="bg-lightbg text-gray-800 h-screen flex flex-col overflow-hidden">
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="absolute inset-0 bg-gradient-to-br from-blue-50 to-cyan-100 flex flex-col items-center justify-center z-50">
+        <div class="bg-white p-10 rounded-3xl shadow-2xl text-center max-w-md w-full border border-blue-100">
+            <div class="text-6xl mb-4 animate-bounce">🤖✨</div>
+            <h1 class="text-4xl font-extrabold text-primary mb-2">KeoAI</h1>
+            <p class="text-gray-500 mb-8 font-medium">مساعدك البرمجي المرح، صُنع بشغف بواسطة<br><span class="text-primary font-bold">كريم حسين محمدصلاح</span></p>
+            <button id="login-btn" class="w-full bg-primary hover:bg-blue-600 text-white font-bold py-4 px-6 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-3 text-lg">
+                <i class="fab fa-google text-xl"></i>
+                تسجيل الدخول باستخدام جوجل
+            </button>
+        </div>
+    </div>
+
+    <!-- Main App Screen (Hidden initially) -->
+    <div id="app-screen" class="hidden h-screen flex flex-col">
+        
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b border-blue-100 p-4 flex justify-between items-center z-10 shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center text-xl font-bold shadow-md">K</div>
+                <h1 class="text-2xl font-extrabold text-primary">Keo<span class="text-secondary">AI</span></h1>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <input type="password" id="groq-api-key" placeholder="Groq API Key (مطلوب)" class="text-sm px-4 py-2 border border-blue-200 rounded-full focus:outline-none focus:border-primary text-left" dir="ltr">
+                <div class="flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-full border border-blue-100">
+                    <img id="user-avatar" src="" alt="User" class="w-8 h-8 rounded-full border-2 border-white shadow-sm">
+                    <span id="user-name" class="font-medium text-sm text-gray-700"></span>
+                </div>
+                <button id="logout-btn" class="text-red-500 hover:bg-red-50 px-4 py-2 rounded-full transition-colors text-sm font-bold flex items-center gap-2">
+                    <i class="fas fa-sign-out-alt"></i> خروج
+                </button>
+            </div>
+        </header>
+
+        <!-- Content Area -->
+        <div class="flex-1 flex overflow-hidden">
+            
+            <!-- Chat Sidebar -->
+            <div class="w-1/3 bg-white border-l border-blue-100 flex flex-col shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-10">
+                <div id="chat-container" class="flex-1 overflow-y-auto p-4 space-y-4">
+                    <!-- Messages will appear here -->
+                    <div class="text-center text-gray-400 mt-10">
+                        <i class="fas fa-robot text-4xl mb-3 text-secondary"></i>
+                        <p>أهلاً بك! أنا كيو.. اسألني أي شيء في البرمجة!</p>
+                    </div>
+                </div>
+                
+                <div class="p-4 bg-white border-t border-blue-50">
+                    <form id="chat-form" class="relative">
+                        <textarea id="chat-input" rows="2" placeholder="اطلب من كيو كتابة كود أو عمل عرض تقديمي..." class="w-full bg-blue-50 border border-blue-100 rounded-2xl py-3 px-4 pr-12 focus:outline-none focus:ring-2 focus:ring-primary resize-none transition-all"></textarea>
+                        <button type="submit" class="absolute bottom-3 left-3 bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors shadow-md">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Workspace Area (Preview & Presentation) -->
+            <div class="w-2/3 bg-slate-50 flex flex-col relative p-4">
+                
+                <!-- Toggle Views -->
+                <div class="flex gap-2 mb-4">
+                    <button id="btn-preview" class="bg-white text-primary px-6 py-2 rounded-full shadow-sm border border-blue-200 font-bold hover:bg-blue-50 active">معاينة الكود (Preview)</button>
+                    <button id="btn-presentation" class="bg-white text-gray-500 px-6 py-2 rounded-full shadow-sm border border-transparent font-bold hover:bg-gray-50">العرض التقديمي (Presentation)</button>
+                </div>
+
+                <!-- Code Preview Container -->
+                <div id="preview-container" class="flex-1 bg-white rounded-3xl shadow-sm border border-blue-100 overflow-hidden relative">
+                    <iframe id="code-iframe" class="w-full h-full border-none"></iframe>
+                    <div id="preview-placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 bg-white">
+                        <i class="fas fa-code text-6xl mb-4 text-blue-100"></i>
+                        <p class="text-lg">سيتم عرض واجهة الأكواد (HTML/CSS/JS) هنا</p>
+                    </div>
+                </div>
+
+                <!-- Presentation Container -->
+                <div id="presentation-container" class="hidden flex-1 bg-gradient-to-br from-indigo-900 to-blue-900 rounded-3xl shadow-xl border-4 border-white overflow-hidden relative text-white">
+                    <div id="slides-wrapper" class="w-full h-full p-10">
+                        <div class="slide active">
+                            <h1 class="text-4xl font-bold mb-4">✨ عروض كيو التقديمية</h1>
+                            <p class="text-xl text-blue-200">اطلب مني عمل عرض تقديمي لأي كود أو موضوع!</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Slide Controls -->
+                    <div class="absolute bottom-6 left-0 right-0 flex justify-center gap-4">
+                        <button id="prev-slide" class="bg-white/20 hover:bg-white/40 text-white rounded-full w-12 h-12 flex items-center justify-center backdrop-blur-sm transition-all">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                        <span id="slide-counter" class="bg-black/30 px-4 py-2 rounded-full font-bold">1 / 1</span>
+                        <button id="next-slide" class="bg-white/20 hover:bg-white/40 text-white rounded-full w-12 h-12 flex items-center justify-center backdrop-blur-sm transition-all">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase and Application Logic (ES Modules) -->
+    <script type="module">
+        // 1. Firebase Setup
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC0lwVRTBPA3yxnZ3wuqvyfQJbJP-AVNJo",
+            authDomain: "kareem-8ed77.firebaseapp.com",
+            databaseURL: "https://kareem-8ed77-default-rtdb.firebaseio.com",
+            projectId: "kareem-8ed77",
+            storageBucket: "kareem-8ed77.firebasestorage.app",
+            messagingSenderId: "557227389584",
+            appId: "1:557227389584:web:f8ffa9c5913ef54c919e15"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        // 2. Global Variables
+        let currentUser = null;
+        let currentSlides = [];
+        let currentSlideIndex = 0;
+
+        // 3. System Prompt for KEO
+        const KEO_PROMPT = `
+        أنت مساعد ذكي ومرح جداً اسمك Keo (كيو). تم برمجتك وتطويرك بواسطة المهندس "كريم حسين محمدصلاح".
+        ممنوع منعاً باتاً أن تذكر أنك مبني على أي نموذج ذكاء اصطناعي آخر (مثل GPT أو Groq أو LLaMA) أو تذكر اسم الشركة المطورة لك.
+        أجب دائماً بأسلوب ودود، استخدم الرموز التعبيرية (Emojis) بكثرة.
+        أنت خبير في البرمجة وعمل Code Review والعروض التقديمية.
+        
+        **تعليمات هامة جداً للرد:**
+        1. إذا طلب المستخدم كود لواجهة (HTML/CSS/JS)، اكتب الكود كاملاً في ملف واحد داخل بلوك كود من نوع HTML هكذا:
+        \`\`\`html
+        <!DOCTYPE html>... الكود هنا
+        \`\`\`
+        2. إذا طلب المستخدم عرض تقديمي (Presentation)، اكتب المحتوى داخل بلوك من نوع presentation، وافصل كل شريحة عن الأخرى بثلاث شرطات (---)، هكذا:
+        \`\`\`presentation
+        # عنوان الشريحة الأولى
+        محتوى الشريحة
+        ---
+        # عنوان الشريحة الثانية
+        محتوى الشريحة
+        \`\`\`
+        `;
+
+        // 4. UI Elements
+        const loginScreen = document.getElementById('login-screen');
+        const appScreen = document.getElementById('app-screen');
+        const loginBtn = document.getElementById('login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const userName = document.getElementById('user-name');
+        const userAvatar = document.getElementById('user-avatar');
+        const chatForm = document.getElementById('chat-form');
+        const chatInput = document.getElementById('chat-input');
+        const chatContainer = document.getElementById('chat-container');
+        const apiKeyInput = document.getElementById('groq-api-key');
+        
+        const btnPreview = document.getElementById('btn-preview');
+        const btnPresentation = document.getElementById('btn-presentation');
+        const previewContainer = document.getElementById('preview-container');
+        const presentationContainer = document.getElementById('presentation-container');
+        const iframe = document.getElementById('code-iframe');
+        const previewPlaceholder = document.getElementById('preview-placeholder');
+        
+        // 5. Auth Logic
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                loginScreen.classList.add('hidden');
+                appScreen.classList.remove('hidden');
+                userName.textContent = user.displayName.split(' ')[0];
+                userAvatar.src = user.photoURL;
+                loadChats(user.uid);
+            } else {
+                currentUser = null;
+                loginScreen.classList.remove('hidden');
+                appScreen.classList.add('hidden');
+                chatContainer.innerHTML = '';
+            }
+        });
+
+        loginBtn.addEventListener('click', () => signInWithPopup(auth, provider));
+        logoutBtn.addEventListener('click', () => signOut(auth));
+
+        // 6. Chat & Groq Logic
+        const loadChats = (uid) => {
+            const q = query(collection(db, `users/${uid}/chats`), orderBy('createdAt', 'asc'));
+            onSnapshot(q, (snapshot) => {
+                chatContainer.innerHTML = '';
+                snapshot.forEach((doc) => {
+                    appendMessage(doc.data().text, doc.data().sender);
+                });
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            });
+        };
+
+        const appendMessage = (text, sender) => {
+            const div = document.createElement('div');
+            div.className = `flex ${sender === 'user' ? 'justify-end' : 'justify-start'} mb-4`;
+            
+            let htmlContent = sender === 'keo' ? marked.parse(text) : text;
+            
+            div.innerHTML = `
+                <div class="max-w-[85%] rounded-2xl p-4 shadow-sm ${sender === 'user' ? 'bg-primary text-white rounded-br-none' : 'bg-white border border-blue-100 text-gray-800 rounded-bl-none markdown-body'}">
+                    ${sender === 'keo' ? '<div class="text-xs font-bold text-secondary mb-1"><i class="fas fa-robot"></i> كيو</div>' : ''}
+                    <div style="word-break: break-word;">${htmlContent}</div>
+                </div>
+            `;
+            chatContainer.appendChild(div);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            // Extract Code or Presentation if it's Keo
+            if (sender === 'keo') {
+                extractAndRenderCode(text);
+                extractAndRenderPresentation(text);
+            }
+        };
+
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const msg = chatInput.value.trim();
+            const apiKey = apiKeyInput.value.trim();
+            
+            if (!msg) return;
+            if (!apiKey) {
+                alert("رجاءً أدخل مفتاح Groq API في الأعلى لكي يعمل كيو!");
+                return;
+            }
+
+            chatInput.value = '';
+            
+            // Add User Message to DB
+            await addDoc(collection(db, `users/${currentUser.uid}/chats`), {
+                text: msg,
+                sender: 'user',
+                createdAt: serverTimestamp()
+            });
+
+            // Show Typing indicator
+            const typingId = 'typing-' + Date.now();
+            const typingDiv = document.createElement('div');
+            typingDiv.id = typingId;
+            typingDiv.className = 'flex justify-start mb-4';
+            typingDiv.innerHTML = `<div class="bg-white border border-blue-100 p-4 rounded-2xl rounded-bl-none text-gray-500 shadow-sm"><i class="fas fa-circle-notch fa-spin"></i> كيو يفكر...</div>`;
+            chatContainer.appendChild(typingDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            try {
+                // Call Groq API
+                const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${apiKey}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        model: "llama3-70b-8192", // Fast and capable model
+                        messages: [
+                            { role: "system", content: KEO_PROMPT },
+                            { role: "user", content: msg }
+                        ]
+                    })
+                });
+
+                const data = await response.json();
+                if(data.error) throw new Error(data.error.message);
+                
+                const keoReply = data.choices[0].message.content;
+
+                // Remove typing
+                document.getElementById(typingId).remove();
+
+                // Save Keo Reply to DB
+                await addDoc(collection(db, `users/${currentUser.uid}/chats`), {
+                    text: keoReply,
+                    sender: 'keo',
+                    createdAt: serverTimestamp()
+                });
+
+            } catch (error) {
+                document.getElementById(typingId).remove();
+                alert("حدث خطأ في الاتصال: " + error.message);
+            }
+        });
+
+        // Submit on Enter (Shift+Enter for new line)
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                chatForm.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        // 7. Workspace Logic (Preview & Presentations)
+        const switchView = (view) => {
+            if (view === 'preview') {
+                previewContainer.classList.remove('hidden');
+                presentationContainer.classList.add('hidden');
+                btnPreview.className = "bg-white text-primary px-6 py-2 rounded-full shadow-sm border border-blue-200 font-bold hover:bg-blue-50";
+                btnPresentation.className = "bg-transparent text-gray-500 px-6 py-2 rounded-full font-bold hover:bg-white hover:shadow-sm";
+            } else {
+                previewContainer.classList.add('hidden');
+                presentationContainer.classList.remove('hidden');
+                btnPresentation.className = "bg-white text-primary px-6 py-2 rounded-full shadow-sm border border-blue-200 font-bold hover:bg-blue-50";
+                btnPreview.className = "bg-transparent text-gray-500 px-6 py-2 rounded-full font-bold hover:bg-white hover:shadow-sm";
+            }
+        };
+
+        btnPreview.addEventListener('click', () => switchView('preview'));
+        btnPresentation.addEventListener('click', () => switchView('presentation'));
+
+        const extractAndRenderCode = (text) => {
+            const codeBlockRegex = /```html\n([\s\S]*?)```/;
+            const match = text.match(codeBlockRegex);
+            if (match && match[1]) {
+                switchView('preview');
+                previewPlaceholder.style.display = 'none';
+                const doc = iframe.contentWindow.document;
+                doc.open();
+                doc.write(match[1]);
+                doc.close();
+            }
+        };
+
+        const extractAndRenderPresentation = (text) => {
+            const presBlockRegex = /```presentation\n([\s\S]*?)```/;
+            const match = text.match(presBlockRegex);
+            if (match && match[1]) {
+                switchView('presentation');
+                const slidesContent = match[1].split('---').map(s => s.trim()).filter(s => s);
+                currentSlides = slidesContent;
+                currentSlideIndex = 0;
+                renderSlide();
+            }
+        };
+
+        const renderSlide = () => {
+            if (currentSlides.length === 0) return;
+            const wrapper = document.getElementById('slides-wrapper');
+            const counter = document.getElementById('slide-counter');
+            
+            wrapper.innerHTML = `<div class="slide active markdown-body p-8 bg-white/10 backdrop-blur-md rounded-2xl shadow-xl w-full max-w-4xl max-h-[80%] overflow-y-auto border border-white/20">
+                ${marked.parse(currentSlides[currentSlideIndex])}
+            </div>`;
+            
+            counter.textContent = `${currentSlideIndex + 1} / ${currentSlides.length}`;
+        };
+
+        document.getElementById('next-slide').addEventListener('click', () => {
+            if (currentSlideIndex < currentSlides.length - 1) {
+                currentSlideIndex++;
+                renderSlide();
+            }
+        });
+
+        document.getElementById('prev-slide').addEventListener('click', () => {
+            if (currentSlideIndex > 0) {
+                currentSlideIndex--;
+                renderSlide();
+            }
+        });
+
+    </script>
+</body>
+</html>
